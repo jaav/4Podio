@@ -1,0 +1,18 @@
+{
+  "generator-jhipster": {
+    "baseName": "4podio",
+    "packageName": "be.virtualsushi.podio.demo",
+    "packageFolder": "be/virtualsushi/podio/demo",
+    "authenticationType": "cookie",
+    "hibernateCache": "no",
+    "clusteredHttpSession": "no",
+    "websocket": "no",
+    "databaseType": "nosql",
+    "devDatabaseType": "mongodb",
+    "prodDatabaseType": "mongodb",
+    "useCompass": false,
+    "buildTool": "maven",
+    "frontendBuilder": "gulp",
+    "javaVersion": "7"
+  }
+}

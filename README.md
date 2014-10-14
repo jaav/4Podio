@@ -1,4 +1,2 @@
-4Podio
-======
-
-Application written on top of Podio
+README for 4podio
+==========================
