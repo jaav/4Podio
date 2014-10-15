@@ -12,14 +12,6 @@ async:
     queueCapacity: 10000
 
 spring:
-    
-    data:
-        mongodb:
-             host: localhost
-             port: 27017
-             databaseName: 4podio
-    
-
     mail:
         host: localhost
         port: 25
@@ -40,3 +32,64 @@ swagger:
     contact:
     license: Apache 2.0
     licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.html
+
+podio:
+    demo:
+        console: false
+    clientId: 4podio
+    
+    virtualsushi:
+        id: 129539
+        space: 
+            id: 2001607
+        institution:
+            id: 9687833
+            token: 8f773fdb1201415681810b0252df6440
+            title:
+                id: 75164650
+                name: title
+            description:
+                id: 75272062
+                name: description
+            address:
+                id: 75167526
+                name: address
+            zipcode:
+                id: 75167658
+                name: zipcode
+            city:
+                id: 75167528
+                name: city
+            phone:
+                id: 75167532
+                name: phone
+            fax:
+                id: 75167533
+                name: fax
+            email:
+                id: 75167531
+                name: email
+            website:
+                id: 75270848
+                name: website
+        volunteer:
+            id: 9688339
+            token: 4e42159402684c69b9e51ff4f896b704
+            firstname:
+                id: 75168336
+                name: firstname
+            lastname:
+                id: 75168514
+                name: lastname
+            description:
+                id: 75273167
+                name: description
+            phone:
+                id: 75168515
+                name: phone
+            email:
+                id: 75168516
+                name: email
+            institution:
+                id: 75168517
+                name: institution

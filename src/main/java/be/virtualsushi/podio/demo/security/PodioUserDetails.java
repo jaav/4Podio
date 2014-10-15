@@ -6,7 +6,8 @@ import java.util.Collections;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.podio.oauth.OAuthToken;
+import be.virtualsushi.podio.demo.dto.OAuthToken;
+
 import com.podio.user.UserStatus;
 
 public class PodioUserDetails implements UserDetails {

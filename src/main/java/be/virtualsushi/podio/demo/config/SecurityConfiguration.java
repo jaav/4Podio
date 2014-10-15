@@ -1,10 +1,10 @@
 package be.virtualsushi.podio.demo.config;
 
-import be.virtualsushi.podio.demo.security.*;
+import javax.inject.Inject;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
@@ -12,12 +12,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.security.web.authentication.RememberMeServices;
 
-import javax.inject.Inject;
+import be.virtualsushi.podio.demo.security.AjaxAuthenticationFailureHandler;
+import be.virtualsushi.podio.demo.security.AjaxAuthenticationSuccessHandler;
+import be.virtualsushi.podio.demo.security.AjaxLogoutSuccessHandler;
+import be.virtualsushi.podio.demo.security.AuthoritiesConstants;
+import be.virtualsushi.podio.demo.security.Http401UnauthorizedEntryPoint;
+import be.virtualsushi.podio.demo.security.PodioAuthenticationProvider;
 
 @Configuration
 @EnableWebSecurity
@@ -38,23 +42,20 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Inject
     private Http401UnauthorizedEntryPoint authenticationEntryPoint;
 
-    @Inject
-    private UserDetailsService userDetailsService;
-
-    @Inject
-    private RememberMeServices rememberMeServices;
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new StandardPasswordEncoder();
     }
+    
+    @Bean
+	public PodioAuthenticationProvider podioAuthenticationProvider(){
+		return new PodioAuthenticationProvider();
+	}
 
-    @Inject
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-            .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder());
-    }
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.authenticationProvider(podioAuthenticationProvider());
+	}
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -74,10 +75,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
             .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint)
-                .and()
-            .rememberMe()
-                .rememberMeServices(rememberMeServices)
-                .key(env.getProperty("jhipster.security.rememberme.key"))
                 .and()
             .formLogin()
                 .loginProcessingUrl("/app/authentication")

@@ -5,9 +5,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.junit.internal.requests.FilterRequest;
-
 import be.virtualsushi.podio.demo.dto.Filter;
+import be.virtualsushi.podio.demo.dto.FilterRequest;
 import be.virtualsushi.podio.demo.dto.item.AppItem;
 import be.virtualsushi.podio.demo.dto.item.Item;
 import be.virtualsushi.podio.demo.dto.item.ItemsResponse;
@@ -20,7 +19,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.podio.common.Reference;
 import com.podio.common.ReferenceType;
-import com.podio.item.ItemAPI;
 import com.podio.tag.TagAPI;
 
 public abstract class AbstractAppService<T extends AppItem> {
@@ -43,12 +41,12 @@ public abstract class AbstractAppService<T extends AppItem> {
 	}
 
 	public void deleteItem(Integer id) {
-		getPodioService().getAPI(ItemAPI.class).deleteItem(id, true);
+		getPodioService().delete("/item/{item_id}?silent={silent}", id, true);
 		cacheService.removeFromCache(new ItemCacheKey(id));
 	}
 
-	public T addItem(Integer appId, T item, boolean silent) {
-		item.setId(getPodioService().post("/item/app/{app_id}/?silent={silent}", getMapper().mapToCreate(item), item.getClass(), appId, silent).getId());
+	public T addItem(T item, boolean silent) {
+		item.setId(getPodioService().post("/item/app/{app_id}/?silent={silent}", getMapper().mapToCreate(item), item.getClass(), getAppId(), silent).getId());
 		return item;
 	}
 

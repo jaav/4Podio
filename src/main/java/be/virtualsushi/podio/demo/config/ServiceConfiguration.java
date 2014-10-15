@@ -4,9 +4,14 @@ import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+import org.springframework.web.client.RestTemplate;
+
+import be.virtualsushi.podio.demo.service.RestTemplateSource;
+import be.virtualsushi.podio.demo.service.podio.SessionTokenInterceptor;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
@@ -28,9 +33,14 @@ public class ServiceConfiguration implements EnvironmentAware {
 		return new OAuthClientCredentials(podioPropertyResolver.getProperty("clientId"), podioPropertyResolver.getProperty("secret"));
 	}
 
-	@Bean
-	public OAuthAppCredentials directAppCredentials() {
-		return new OAuthAppCredentials(podioPropertyResolver.getProperty("app.id", Integer.class), podioPropertyResolver.getProperty("app.token"));
+	@Bean(name = "institutionCredentials")
+	public OAuthAppCredentials institutionAppCredentials() {
+		return new OAuthAppCredentials(podioPropertyResolver.getProperty("virtualsushi.institution.id", Integer.class), podioPropertyResolver.getProperty("virtualsushi.institution.token"));
+	}
+
+	@Bean(name = "volunteerCredentials")
+	public OAuthAppCredentials volunteerAppCredentials() {
+		return new OAuthAppCredentials(podioPropertyResolver.getProperty("virtualsushi.volunteer.id", Integer.class), podioPropertyResolver.getProperty("virtualsushi.volunteer.token"));
 	}
 
 	@Bean
@@ -41,6 +51,18 @@ public class ServiceConfiguration implements EnvironmentAware {
 	@Override
 	public void setEnvironment(Environment environment) {
 		podioPropertyResolver = new RelaxedPropertyResolver(environment, Constants.PODIO_ENV_PREFIX);
+	}
+
+	@Bean
+	public RestTemplate restTemplate(SessionTokenInterceptor oauthHttpRequestInterceptor) {
+		return RestTemplateSource.createRestTemplate(oauthHttpRequestInterceptor);
+	}
+
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+		PropertySourcesPlaceholderConfigurer result = new PropertySourcesPlaceholderConfigurer();
+		result.setIgnoreUnresolvablePlaceholders(true);
+		return result;
 	}
 
 }

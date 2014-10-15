@@ -9,7 +9,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import be.virtualsushi.podio.demo.dto.OAuthToken;
+import be.virtualsushi.podio.demo.service.RestTemplateSource;
 
+import com.podio.oauth.OAuthClientCredentials;
 import com.podio.oauth.OAuthUserCredentials;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
@@ -17,9 +19,14 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 public class OAuthService {
 
 	@Inject
+	private OAuthClientCredentials oAuthClientCredentials;
+
 	private RestTemplate restTemplate;
 
 	public OAuthToken getToken(OAuthUserCredentials userCredentials) {
+		if (restTemplate == null) {
+			restTemplate = RestTemplateSource.createRestTemplate(new ClientCredentialsInterceptor(oAuthClientCredentials));
+		}
 		MultivaluedMap<String, String> parameters = new MultivaluedMapImpl();
 		parameters.add("grant_type", userCredentials.getType());
 		userCredentials.addParameters(parameters);

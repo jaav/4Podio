@@ -8,13 +8,12 @@ import java.net.URLEncoder;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
-import org.springframework.data.util.ReflectionUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +21,19 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import be.virtualsushi.podio.demo.dto.OAuthToken;
+import be.virtualsushi.podio.demo.dto.SpaceMembershipInfo;
 import be.virtualsushi.podio.demo.dto.file.FileInfo;
 import be.virtualsushi.podio.demo.dto.file.FileLink;
 import be.virtualsushi.podio.demo.dto.file.FileProxy;
 import be.virtualsushi.podio.demo.security.PodioUserDetails;
 import be.virtualsushi.podio.demo.service.FileBytesResource;
+import be.virtualsushi.podio.demo.service.RestTemplateSource;
 import be.virtualsushi.podio.demo.service.cache.CacheService;
 import be.virtualsushi.podio.demo.service.cache.FileCacheKey;
 
@@ -38,7 +41,10 @@ import com.podio.BaseAPI;
 import com.podio.ResourceFactory;
 import com.podio.oauth.OAuthClientCredentials;
 import com.podio.oauth.OAuthUserCredentials;
+import com.podio.user.UserAPI;
+import com.podio.user.UserStatus;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 @Service("podioService")
 public class PodioServiceImpl implements PodioService {
@@ -54,27 +60,48 @@ public class PodioServiceImpl implements PodioService {
 	private OAuthClientCredentials clientCredentials;
 
 	@Inject
+	private SessionTokenProvider tokenProvider;
+
+	@Inject
 	private RestTemplate restTemplate;
 
 	@Inject
 	private CacheService cacheService;
 
-	@Inject
-	private Environment environment;
-
-	@Value("${podio.direct.space.id}")
+	@Value("${podio.virtualsushi.space.id}")
 	private int spaceId;
 
 	private ResourceFactory resourceFactory;
 
 	@Override
 	public PodioUserDetails doPodioLogin(OAuthUserCredentials userCredentials) throws BadCredentialsException {
-		return null;
+		try {
+			OAuthToken token = oauthService.getToken(userCredentials);
+			UserStatus userStatus = getAPI(UserAPI.class, createResourceFactory(new LocalTokenProvider(oauthService, token))).getStatus();
+			SpaceMembershipInfo membershipInfo = RestTemplateSource.createRestTemplate(new LocalTokenInterceptor(token)).getForObject(PODIO_BASE_URL + "/space/{spaceId}/member/{userId}", SpaceMembershipInfo.class, spaceId,
+					userStatus.getUser().getId());
+			if (membershipInfo.getEndedOn() == null) {
+				return new PodioUserDetails(userStatus, token);
+			} else {
+				throw new BadCredentialsException("User is not in DIRECT's workspace.");
+			}
+		} catch (Exception e) {
+			MultivaluedMap<String, String> parameters = new MultivaluedMapImpl();
+			userCredentials.addParameters(parameters);
+			throw new BadCredentialsException("Unable to authenticate user with credentials " + parameters.toString());
+		}
 	}
 
 	@Override
 	public <T extends BaseAPI> T getAPI(Class<T> apiClass) {
-		return getAPI(apiClass, resourceFactory);
+		try {
+			if (resourceFactory == null) {
+				resourceFactory = createResourceFactory(tokenProvider);
+			}
+			return getAPI(apiClass, resourceFactory);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			throw new RuntimeException("unable to create resource factory.");
+		}
 	}
 
 	private <T extends BaseAPI> T getAPI(Class<T> apiClass, ResourceFactory resourceFactory) {
