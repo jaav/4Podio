@@ -42,7 +42,11 @@ public class InstitutionItemMapper implements PodioItemMapper<Institution> {
 	@Value("${podio.virtualsushi.institution.website.id}")
 	private Integer websiteFieldId;
 
+	@Value("${podio.virtualsushi.institution.category.id}")
+	private Integer categoryFieldId;
+
 	private StringFieldMapper stringFieldMapper = new StringFieldMapper();
+	private CategoryFieldMapper categoryFieldMapper = new CategoryFieldMapper();
 
 	@Override
 	public Institution map(Item podioItem) {
@@ -75,6 +79,9 @@ public class InstitutionItemMapper implements PodioItemMapper<Institution> {
 			}
 			if (field.getId() == websiteFieldId) {
 				result.setWebsite(stringFieldMapper.map(field));
+			}
+			if (field.getId() == categoryFieldId) {
+				result.setCategory(categoryFieldMapper.map(field));
 			}
 		}
 		if (StringUtils.isBlank(result.getTitle())) {
@@ -125,6 +132,9 @@ public class InstitutionItemMapper implements PodioItemMapper<Institution> {
 		}
 		if (StringUtils.isNotBlank(institution.getWebsite())) {
 			result.add(new FieldValuesUpdate(websiteFieldId, stringFieldMapper.mapBack(institution.getWebsite())));
+		}
+		if (institution.getCategory() != null) {
+			result.add(new FieldValuesUpdate(categoryFieldId, categoryFieldMapper.mapBack(institution.getCategory())));
 		}
 		return result;
 	}

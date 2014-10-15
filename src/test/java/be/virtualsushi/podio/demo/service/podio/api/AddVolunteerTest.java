@@ -14,6 +14,7 @@ public class AddVolunteerTest extends AbstractVolunteerServiceTest {
 
 	private static final String[] NAMES = { "Martin", "Neo", "Paul", "Joe", "Phiby", "Monica", "Rachel", "Ross", "Albert", "Chandler" };
 	private static final String[] SURNAMES = { "Fry", "Anderson", "Smith", "Tribiani", "Buffe", "Geller", "Green", "Bink", "Einstein", "Lorry" };
+	private static final String[] DESCRIPTIONS = { "Software Developer", "Manager", "Boss", "Nice guy", "Designer", "Security", "HR" };
 
 	@Inject
 	private InstitutionAppService institutionAppService;
@@ -21,15 +22,15 @@ public class AddVolunteerTest extends AbstractVolunteerServiceTest {
 	@Test
 	public void testAddVolunteer() {
 		Volunteer volunteer = new Volunteer();
-		String name = NAMES[randomIndex()];
-		String surname = SURNAMES[randomIndex()];
+		String name = NAMES[randomIndex(NAMES.length)];
+		String surname = SURNAMES[randomIndex(SURNAMES.length)];
 		volunteer.setFirstName(name);
 		volunteer.setLastName(surname);
-		volunteer.setPhone("+1100" + randomIndex() + "00" + randomIndex() + "00" + randomIndex());
+		volunteer.setPhone("+1100" + randomDecIndex() + "00" + randomDecIndex() + "00" + randomDecIndex());
 		volunteer.setEmail(name.toLowerCase() + "." + surname.toLowerCase() + "@gmail.com");
+		volunteer.setDescription(DESCRIPTIONS[randomIndex(DESCRIPTIONS.length)]);
 		List<Institution> institutions = list(institutionAppService, new FilterRequest());
-		Integer number = readConsoleInt("Enter institution numder");
-		volunteer.setInstitution(institutions.get(number - 1));
+		volunteer.setInstitution(institutions.get(randomIndex(institutions.size())));
 		Volunteer result = volunteerAppService.addItem(volunteer, true);
 		System.out.println("Added volunteer: " + result);
 	}

@@ -26,6 +26,8 @@ public class Institution extends AppItem {
 
 	private String website;
 
+	private CategoryOption category;
+
 	@Override
 	public String toString() {
 		return "Institution(id=" + getId() + ", title=" + getTitle() + ")";

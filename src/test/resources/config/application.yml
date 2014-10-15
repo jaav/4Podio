@@ -72,6 +72,9 @@ podio:
             website:
                 id: 75270848
                 name: website
+            category:
+                id: 75168065
+                name: category    
         volunteer:
             id: 9688339
             token: 4e42159402684c69b9e51ff4f896b704

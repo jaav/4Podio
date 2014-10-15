@@ -115,7 +115,11 @@ public class AbstractApiServiceTest {
 		return items;
 	}
 
-	protected int randomIndex() {
-		return (int) Math.round((Math.random() * 10)) % 10;
+	protected int randomIndex(int base) {
+		return (int) Math.round((Math.random() * 100)) % base;
+	}
+
+	protected int randomDecIndex() {
+		return randomIndex(10);
 	}
 }
