@@ -37,7 +37,7 @@ swagger:
 
 podio:
 	demo:
-	    console: false
+        console: false
     clientId: 4podio
     
     virtualsushi:

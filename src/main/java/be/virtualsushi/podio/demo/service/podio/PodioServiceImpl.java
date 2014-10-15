@@ -69,7 +69,7 @@ public class PodioServiceImpl implements PodioService {
 	private CacheService cacheService;
 
 	@Value("${podio.virtualsushi.space.id}")
-	private int spaceId;
+	private Integer spaceId;
 
 	private ResourceFactory resourceFactory;
 
